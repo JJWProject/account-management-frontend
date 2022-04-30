@@ -1,77 +1,56 @@
 // @ts-nocheck
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./authStyles.css";
-import * as authConstants from "../../constants/authConstants.tsx";
+// import "./css/authStyles.css";
 import { useNavigate } from "react-router-dom";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import React, { useEffect, useReducer, useRef, useState } from "react";
-import { Modal } from "react-bootstrap";
-import authReducer from "../../reducer/auth/authReducer.tsx";
+import { useRef, useState } from "react";
+import { login } from "./Login.actions";
+import { authActions } from "../../../store/slices/authenticationSlice";
+import { useDispatch } from "react-redux";
 
-const Login = (props) => {
+const Login = () => {
+  const [errorMessage, setErrorMessage] = useState("");
   const usernameRef = useRef();
   const passwordRef = useRef();
   const navigate = useNavigate();
-
-  const initialState = { isValid: false, message: "", feedback: "" };
-  const [loginState, loginDispatch] = useReducer(authReducer, initialState);
-  const [modalState, setModalState] = useState(false);
-
-  useEffect(() => {
-    if (loginState.message !== "") {
-      document.getElementById("username").style.backgroundColor = "#FBE9E9";
-      document.getElementById("password").style.backgroundColor = "#FBE9E9";
-    }
-
-    if (loginState.isValid === true) {
-      props.login();
-    }
-  }, [loginState]);
-
-  useEffect(() => {
-    if (props.isLoggedIn) {
-      redirectToMainPage();
-    }
-  }, [props]);
-
-  // closing pop up modal
-  const onCloseModal = () => {
-    setModalState(false);
-  };
-
-  // opening pop up modal
-  const onOpenModal = () => {
-    setModalState(true);
-  };
+  const dispatch = useDispatch();
 
   const resetInput = () => {
     document.getElementById("username").style.backgroundColor = "white";
     document.getElementById("password").style.backgroundColor = "white";
-    loginDispatch({ type: authConstants.RESET_INPUT });
+    setErrorMessage("");
   };
 
   const loginHandler = () => {
     const username = usernameRef.current.value;
     const password = passwordRef.current.value;
-    loginDispatch({
-      type: authConstants.LOGIN,
-      payload: { username, password },
-    });
+    let res: boolean = false;
+    try {
+      res = login(username, password);
+    } catch (err) {
+      setErrorMessage(err.message);
+      document.getElementById("username").style.backgroundColor = "#FBE9E9";
+      document.getElementById("password").style.backgroundColor = "#FBE9E9";
+      document.getElementById("username").focus();
+    } finally {
+      if (res) {
+        dispatch(authActions.login());
+      }
+    }
   };
 
   const redirectToRegisterPage = () => {
+    resetInput();
     navigate("/register");
   };
 
-  const redirectToMainPage = () => {
-    navigate("/");
-  };
-
   const redirectToForgetPasswordPage = () => {
+    resetInput();
     navigate("/forgetpassword");
   };
+
 
   return (
     <div className="login-container">
@@ -86,7 +65,7 @@ const Login = (props) => {
             <InputText
               id="username"
               type="username"
-              placeholder="username or E-Mail"
+              placeholder="Username or E-Mail"
               ref={usernameRef}
               onKeyDown={() => resetInput()}
             />
@@ -114,11 +93,7 @@ const Login = (props) => {
             <br />
             <br />
             <br />
-            <div
-              style={loginState.isValid ? { color: "black" } : { color: "red" }}
-            >
-              {loginState.message}
-            </div>
+            <div style={{ color: "red" }}>{errorMessage}</div>
           </div>
           <br />
           <div className="p-field">
@@ -144,27 +119,6 @@ const Login = (props) => {
           <br />
         </div>
       </Card>
-
-      {/* pop up model */}
-      <Modal
-        show={modalState}
-        onHide={() => onCloseModal()}
-        backdrop="static"
-        keyboard={false}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Forget Password</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => onCloseModal()}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={() => onCloseModal()}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

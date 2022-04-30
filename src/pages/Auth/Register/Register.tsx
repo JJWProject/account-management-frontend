@@ -1,69 +1,34 @@
 // @ts-nocheck
 import "bootstrap/dist/css/bootstrap.min.css";
-
-import * as authConstants from "../../constants/authConstants.tsx";
+// import "./css/authStyles.css";
 import { useNavigate } from "react-router-dom";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { useEffect, useReducer, useRef, useState } from "react";
-import { Modal } from "react-bootstrap";
-import authReducer from "../../reducer/auth/authReducer.tsx";
+import { useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "./Register.actions";
+import {
+  CONTACT_NUMBER,
+  EMAIL,
+  NAME,
+  PASSWORD,
+  USERNAME,
+} from "../../../constants/authConstants";
+import { authActions } from "../../../store/slices/authenticationSlice";
 
-const Register = (props) => {
-  const [modalState, setModalState] = useState(false);
-
+const Register = () => {
+  const isAuth = useSelector((state) => state.auth.isAuthenticated);
+  const [errorMessage, setErrorMessage] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const nameRef: any = useRef();
   const usernameRef: any = useRef();
   const emailRef: any = useRef();
   const contactNumberRef: any = useRef();
   const passwordRef: any = useRef();
-  const navigate = useNavigate();
 
-  const initialState: any = { isValid: false, message: "", feedback: "" };
-  const [registerState, registerDispatch] = useReducer(
-    authReducer,
-    initialState
-  );
-
-  useEffect(() => {
-    if (registerState.feedback === "name") {
-      document.getElementById("name").style.backgroundColor = "#FBE9E9";
-      document.getElementById("name").focus();
-    }
-    if (registerState.feedback === "username") {
-      document.getElementById("username").style.backgroundColor = "#FBE9E9";
-      document.getElementById("username").focus();
-    }
-    if (registerState.feedback === "email") {
-      document.getElementById("email").style.backgroundColor = "#FBE9E9";
-      document.getElementById("email").focus();
-    }
-    if (registerState.feedback === "contactNumber") {
-      document.getElementById("contact").style.backgroundColor = "#FBE9E9";
-      document.getElementById("contact").focus();
-    }
-    if (registerState.feedback === "password") {
-      document.getElementById("password").style.backgroundColor = "#FBE9E9";
-      document.getElementById("password").focus();
-    }
-    if (registerState.isValid) {
-      props.login();
-    }
-  }, [registerState]);
-
-  useEffect(() => {
-    if (props.isLoggedIn) {
-      redirectToLoginPage();
-    }
-  }, [props]);
-
-  // closing pop up modal
-  const onCloseModal = () => {
-    setModalState(false);
-  };
-
-  const redirectToLoginPage = () => {
+  const redirectToMainPage = () => {
     navigate("/");
   };
 
@@ -73,7 +38,7 @@ const Register = (props) => {
     document.getElementById("email").style.backgroundColor = "white";
     document.getElementById("contact").style.backgroundColor = "white";
     document.getElementById("password").style.backgroundColor = "white";
-    registerDispatch({ type: authConstants.RESET_INPUT });
+    setErrorMessage("");
   };
 
   const registerHandler = () => {
@@ -82,12 +47,43 @@ const Register = (props) => {
     const email = emailRef.current.value;
     const contactNumber = contactNumberRef.current.value;
     const password = passwordRef.current.value;
-
-    registerDispatch({
-      type: authConstants.REGISTER,
-      payload: { name, username, email, contactNumber, password },
-    });
+    let res: boolean = false;
+    try {
+      res = register(name, username, email, contactNumber, password);
+    } catch (err) {
+      setErrorMessage(err.message);
+      switch (err.remarks) {
+        case NAME:
+          document.getElementById("name").style.backgroundColor = "#FBE9E9";
+          document.getElementById("name").focus();
+          break;
+        case USERNAME:
+          document.getElementById("username").style.backgroundColor = "#FBE9E9";
+          document.getElementById("username").focus();
+          break;
+        case EMAIL:
+          document.getElementById("email").style.backgroundColor = "#FBE9E9";
+          document.getElementById("email").focus();
+          break;
+        case PASSWORD:
+          document.getElementById("password").style.backgroundColor = "#FBE9E9";
+          document.getElementById("password").focus();
+          break;
+        case CONTACT_NUMBER:
+          document.getElementById("contact").style.backgroundColor = "#FBE9E9";
+          document.getElementById("contact").focus();
+          break;
+      }
+    } finally {
+      if (res) {
+        dispatch(authActions.login());
+      }
+    }
   };
+
+  if (isAuth) {
+    redirectToMainPage();
+  }
 
   return (
     <div className="login-container">
@@ -112,7 +108,7 @@ const Register = (props) => {
             <InputText
               id="username"
               type="username"
-              placeholder="username"
+              placeholder="Username"
               ref={usernameRef}
               onKeyDown={() => resetInput()}
             />
@@ -149,13 +145,7 @@ const Register = (props) => {
           </div>
           <br />
           <br />
-          <div
-            style={
-              registerState.isValid ? { color: "black" } : { color: "red" }
-            }
-          >
-            {registerState.message}
-          </div>
+          <div style={{ color: "red" }}>{errorMessage}</div>
           <br />
           <br />
           <div className="p-field">
@@ -168,7 +158,7 @@ const Register = (props) => {
           <div className="p-field">
             Have an account?{" "}
             <span
-              onClick={() => redirectToLoginPage()}
+              onClick={() => redirectToMainPage()}
               style={{ textDecoration: "underline", cursor: "pointer" }}
             >
               Login here
@@ -176,27 +166,6 @@ const Register = (props) => {
           </div>
         </div>
       </Card>
-
-      {/* pop up model */}
-      <Modal
-        show={modalState}
-        onHide={() => onCloseModal()}
-        backdrop="static"
-        keyboard={false}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Forget Password</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => onCloseModal()}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={() => onCloseModal()}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

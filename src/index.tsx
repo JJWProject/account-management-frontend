@@ -8,16 +8,20 @@ import App from "./App.tsx";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 
+import { Provider } from 'react-redux';
+import store from './store/index';
 
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
 
 root.render(
-  <StrictMode>
-    <Router>
-      <App />
-    </Router>
-  </StrictMode>,
+  <Provider store={store}>
+    <StrictMode>
+      <Router>
+        <App />
+      </Router>
+    </StrictMode>
+  </Provider>,
 );
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
