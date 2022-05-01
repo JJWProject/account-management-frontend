@@ -1,3 +1,7 @@
+import axios from "axios";
+import { CustomError } from "../../../common/Exceptions";
+import { BOOLEAN_FALSE } from "../../../constants/authConstants";
+
 const DEFAULT_URL = "http://localhost:8080/";
 
 const requestOptions = (list: any) => {
@@ -18,17 +22,33 @@ export const loginByUsername = (username: string, password: string) => {
   }
 };
 
-export const loginRequest = async (username: string, password: string) => {
+export const loginRequest = (username: string, password: string) => {
 
   let params = new URLSearchParams({
     username,
     password,
   })
-  
-  fetch(DEFAULT_URL + "api/login?" + params)
-    .then((response) => response.json().then((data) => console.log(data)))
-    .catch((error) => console.log(error));
 
+  console.log("LOGIN")
+  const res = axios.get(DEFAULT_URL + "api/login?" + params)
+    .then(async response => {
+      return await response.data;
+    }).catch((error) => {
+      throw new Error("Invalid Username or Password2");
+    });
+
+  return res;
+  // try {
+  //   fetch(DEFAULT_URL + "api/login?" + params)
+  //     .then((response) => {
+  //       console.log("Res", response)
+  //       response.json()
+  //         .then((data) => console.log("data", data))
+  //     })
+  //     .catch((error) => console.log("err", error));
+  // } catch (err) {
+  //   console.log(err)
+  // }
 
 };
 

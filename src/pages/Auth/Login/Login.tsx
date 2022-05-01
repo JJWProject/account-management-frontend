@@ -28,8 +28,9 @@ const Login = () => {
     const password = passwordRef.current.value;
     let res: boolean = false;
     try {
-      res = login(username, password);
+      login(username, password)
     } catch (err) {
+      console.log("err in login.tsx")
       setErrorMessage(err.message);
       document.getElementById("username").style.backgroundColor = "#FBE9E9";
       document.getElementById("password").style.backgroundColor = "#FBE9E9";
