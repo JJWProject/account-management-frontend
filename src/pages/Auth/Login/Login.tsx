@@ -9,6 +9,8 @@ import { useRef, useState } from "react";
 import { login } from "./Login.actions";
 import { authActions } from "../../../store/slices/authenticationSlice";
 import { useDispatch } from "react-redux";
+import { isInputEmail, passwordComplexityCheck, validEmailCheck, validUsernameCheck } from "../common/validations";
+import { loginRequest } from "../services/loginService";
 
 const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
@@ -23,22 +25,20 @@ const Login = () => {
     setErrorMessage("");
   };
 
-  const loginHandler = () => {
+  const showError = () => {
+    document.getElementById("username").style.backgroundColor = "#FBE9E9";
+    document.getElementById("password").style.backgroundColor = "#FBE9E9";
+    document.getElementById("username").focus();
+  }
+  const loginHandler = async () => {
     const username = usernameRef.current.value;
     const password = passwordRef.current.value;
-    let res: boolean = false;
-    try {
-      login(username, password)
-    } catch (err) {
-      console.log("err in login.tsx")
-      setErrorMessage(err.message);
-      document.getElementById("username").style.backgroundColor = "#FBE9E9";
-      document.getElementById("password").style.backgroundColor = "#FBE9E9";
-      document.getElementById("username").focus();
-    } finally {
-      if (res) {
-        dispatch(authActions.login());
-      }
+    const response = await login(username, password);
+    if (response.status === 200) {
+      dispatch(authActions.login(response.data["access_token"]));
+    } else {
+      setErrorMessage(response.statusText);
+      showError();
     }
   };
 

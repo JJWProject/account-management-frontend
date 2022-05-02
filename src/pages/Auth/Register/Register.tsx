@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { register } from "./Register.actions";
 import {
@@ -27,6 +27,12 @@ const Register = () => {
   const emailRef: any = useRef();
   const contactNumberRef: any = useRef();
   const passwordRef: any = useRef();
+
+  useEffect(() => {
+    if (isAuth) {
+      navigate("/");
+    }
+  }, [isAuth])
 
   const redirectToMainPage = () => {
     navigate("/");
@@ -50,6 +56,7 @@ const Register = () => {
     let res: boolean = false;
     try {
       res = register(name, username, email, contactNumber, password);
+      console.log(res);
     } catch (err) {
       setErrorMessage(err.message);
       switch (err.remarks) {
@@ -80,11 +87,6 @@ const Register = () => {
       }
     }
   };
-
-  if (isAuth) {
-    redirectToMainPage();
-  }
-
   return (
     <div className="login-container">
       <Card

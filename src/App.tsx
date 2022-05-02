@@ -11,16 +11,30 @@ import HomePage from "./pages/Home/HomePage.tsx";
 import "primereact/resources/themes/lara-light-indigo/theme.css"; //theme
 import "primereact/resources/primereact.min.css"; //core css
 import "primeicons/primeicons.css";
-import { useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { authActions } from "./store/slices/authenticationSlice";
 
 const App = () => {
   // global state of auth
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
+  const dispatch = useDispatch();
 
+  const [isLoaded, setIsLoaded] = useState(false)
   useEffect(() => {
-  }, [isAuth]);
+    const token: string | boolean = window.sessionStorage.getItem("token");
+    // TODO : check if token is valid from backend
+    if (token) {
+      dispatch(authActions.login(token));
+    } else {
+      window.sessionStorage.removeItem("token");
+    }
+    setIsLoaded(true);
+  }, []);
 
+  if (!isLoaded) {
+    return <React.Fragment>Initializing please wait. . .</React.Fragment>
+  }
   return (
     <Routes>
       {isAuth ? (

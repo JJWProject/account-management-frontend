@@ -35,6 +35,7 @@ export const register = (
   ) {
     try {
       res = registerRequest(name, username, password, email, contactNumber);
+      console.log(res)
     } catch (err) {
       console.log("res", err)
     }

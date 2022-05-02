@@ -13,10 +13,12 @@ const authSlice = createSlice({
   name: "auth",
   initialState: initialAuthState,
   reducers: {
-    login(state) {
+    login(state, action) {
+      window.sessionStorage.setItem("token", action.payload)
       state.isAuthenticated = BOOLEAN_TRUE;
     },
     logout(state) {
+      sessionStorage.removeItem('token');
       state.isAuthenticated = BOOLEAN_FALSE;
     },
   },

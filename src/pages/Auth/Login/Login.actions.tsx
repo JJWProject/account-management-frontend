@@ -6,28 +6,30 @@ import {
 } from "../common/validations";
 import { loginRequest } from "../services/loginService";
 
-export const login = (username: string, password: string) => {
+const defaultResponse = {
+  data: [],
+  status: 403,
+  statusText: '',
+}
+
+export const login = async (username: string, password: string) => {
   if (isInputEmail(username)) {
     if (validEmailCheck(username) && passwordComplexityCheck(password)) {
-      console.log("here 1")
-      loginRequest(username, password).then(res => {
-        console.log(res)
-      }).catch(err => {
-        throw new Error(err.message);
-      });
+      const response: any = await loginRequest(username, password);
+      response.statusText = 'Invalid email or password'
+      return response
     } else {
-      throw new Error("Invalid email or password");
+      defaultResponse.statusText = "Invalid email or password";
+      return defaultResponse
     }
   } else {
     if (validUsernameCheck(username) && passwordComplexityCheck(password)) {
-      console.log("here 2")
-      loginRequest(username, password).then(res => {
-        console.log(res)
-      }).catch(err => {
-        return (err.message);
-      });
+      const response: any = await loginRequest(username, password);
+      response.statusText = 'Invalid username or password'
+      return response
     } else {
-      throw new Error("Invalid username or password");
+      defaultResponse.statusText = "Invalid username or password";
+      return defaultResponse
     }
   }
 };
