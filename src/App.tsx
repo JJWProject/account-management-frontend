@@ -22,7 +22,8 @@ const App = () => {
 
   const [isLoaded, setIsLoaded] = useState(false)
   useEffect(() => {
-    const token: string | boolean = window.sessionStorage.getItem("token");
+    const token: string | boolean = sessionStorage.getItem("token");
+    console.log("token:", token)
     // TODO : check if token is valid from backend
     if (token) {
       dispatch(authActions.login(token));

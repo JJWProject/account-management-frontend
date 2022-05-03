@@ -18,8 +18,7 @@ import {
 } from "../common/validations";
 import { registerRequest } from "../services/registerService";
 
-let res: any;
-export const register = (
+export const register = async (
   name: string,
   username: string,
   email: string,
@@ -33,13 +32,7 @@ export const register = (
     validContactNumberCheck(contactNumber) &&
     passwordComplexityCheck(password)
   ) {
-    try {
-      res = registerRequest(name, username, password, email, contactNumber);
-      console.log(res)
-    } catch (err) {
-      console.log("res", err)
-    }
-    return false;
+    return await registerRequest(name, username, password, email, contactNumber);
   } else {
     if (!validNameCheck(name)) {
       throw new CustomError("Please enter your name", BOOLEAN_TRUE, NAME);

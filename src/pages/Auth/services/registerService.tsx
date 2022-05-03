@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const DEFAULT_URL = "http://localhost:8080/";
 
 const requestOptions = (list: any) => {
@@ -15,7 +17,6 @@ export const registerRequest = async (
   email: string,
   contactNumber: string
 ) => {
-  let res: any;
   const userObj = {
     id: null,
     name: name,
@@ -26,8 +27,20 @@ export const registerRequest = async (
   };
 
 
-  console.log(requestOptions(userObj))
-  fetch(DEFAULT_URL + "api/appuser/common", requestOptions(userObj))
-    .then((response) => response.json().then((data) => console.log(data)))
-    .catch((error) => console.log(error));
+  const res = axios.post(DEFAULT_URL + "api/appuser/common", userObj)
+    .then(response => {
+      return {
+        data: response.data,
+        status: response.status,
+        statusText: '',
+      }
+    }).catch((error) => {
+      return {
+        data: [],
+        status: error.request.status,
+        statusText: '',
+      }
+    });
+
+  return res;
 };

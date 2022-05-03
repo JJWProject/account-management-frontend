@@ -16,6 +16,7 @@ import {
   USERNAME,
 } from "../../../constants/authConstants";
 import { authActions } from "../../../store/slices/authenticationSlice";
+import { login } from "../Login/Login.actions";
 
 const Register = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
@@ -47,7 +48,7 @@ const Register = () => {
     setErrorMessage("");
   };
 
-  const registerHandler = () => {
+  const registerHandler = async () => {
     const name = nameRef.current.value;
     const username = usernameRef.current.value;
     const email = emailRef.current.value;
@@ -55,8 +56,17 @@ const Register = () => {
     const password = passwordRef.current.value;
     let res: boolean = false;
     try {
-      res = register(name, username, email, contactNumber, password);
-      console.log(res);
+      res = await register(name, username, email, contactNumber, password);
+      if (res.status == 200) {
+        const response = await login(username, password);
+        if (response.status === 200) {
+          dispatch(authActions.login(response.data["access_token"]));
+        } else {
+          setErrorMessage(response.statusText);
+        }
+      } else {
+        setErrorMessage('Account is already registered');
+      }
     } catch (err) {
       setErrorMessage(err.message);
       switch (err.remarks) {
@@ -83,7 +93,7 @@ const Register = () => {
       }
     } finally {
       if (res) {
-        dispatch(authActions.login());
+        // dispatch(authActions.login());
       }
     }
   };

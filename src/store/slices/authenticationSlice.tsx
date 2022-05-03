@@ -14,7 +14,7 @@ const authSlice = createSlice({
   initialState: initialAuthState,
   reducers: {
     login(state, action) {
-      window.sessionStorage.setItem("token", action.payload)
+      sessionStorage.setItem("token", action.payload)
       state.isAuthenticated = BOOLEAN_TRUE;
     },
     logout(state) {
